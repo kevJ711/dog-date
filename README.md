@@ -17,7 +17,7 @@ A lovable web app in 6–8 weeks that lets owners create profiles, browse for ne
 - [ ] Can clone the repo, create branches, and push code.
 
 **Cindy**  
-- [ ] Can clone the repo, create branches, and push code.
+- [x] Can clone the repo, create branches, and push code.
 
 ---  
 ## Backend Team   
