@@ -30,7 +30,7 @@ A lovable web app in 6–8 weeks that lets owners create profiles, browse for ne
 
 ### Individual To-dos  
 **Samuel**
-- [ ] Can clone the repo, create branches, and push code.  
+- [x] Can clone the repo, create branches, and push code.  
 
 **Raana**
 - [ ] Can clone the repo, create branches, and push code.
