@@ -3,11 +3,11 @@ A lovable web app in 6–8 weeks that lets owners create profiles, browse for ne
 ---  
 ## Fontend Team  
 ### Week 1 Frontend To-dos  
-| Feature             | Status  | PR Approved | Assignee |
-|---------------------|---------|-------------|----------|
-| Home/Landing page   | Open    |             |          |
-| Login Page          | Open    |             |          |
-| Sign up Page        | Open    |             |          |
+| Feature             | Status        | PR Approved | Assignee |
+|---------------------|---------------|-------------|----------|
+| Home/Landing page   | In Progress   |             |   Cindy  |
+| Login Page          | Open          |             |          |
+| Sign up Page        | Open          |             |          |
 
 ### Individual To-dos
 **Jason**  
