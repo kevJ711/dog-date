@@ -6,8 +6,8 @@ A lovable web app in 6–8 weeks that lets owners create profiles, browse for ne
 | Feature             | Status        | PR Approved | Assignee |
 |---------------------|---------------|-------------|----------|
 | Home/Landing page   | In Progress   |             |   Cindy  |
-| Login Page          | Open          |             |          |
-| Sign up Page        | Open          |             |          |
+| Login Page          | In Progress   |             |          |
+| Sign up Page        | In Progress   |             |          |
 
 ### Individual To-dos
 **Jason**  
