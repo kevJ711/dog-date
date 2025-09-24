@@ -3,7 +3,7 @@ export default function Signup() {
     <main>
         <div className="bg-black w-full min-h-screen flex justify-center items-center;">
             <div className="bg-white w-[500px] h-auto p-8 rounded shadow-lg;">
-                <h1 className="text-black text-2xl font-mono" >Create an Account</h1>
+                <h1 className="text-black text-2xl font-mono;" >Create an Account</h1>
                 <form>
                     <label htmlFor="name" >Name</label><br />
                     <input className="box" id="name" type="text"/><br />
