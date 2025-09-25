@@ -11,9 +11,6 @@ export default function Signup() {
                     <label htmlFor="email ">Email</label><br />
                     <input className="box" id="email" type="email" /><br />
 
-                    <label htmlFor="bio" >Bio</label><br />
-                    <textarea className="box" id="bio" name="bio" ></textarea><br />
-
                     <label htmlFor="username" >Username</label><br />
                     <input className="box" id="username" name="username" type="text" /><br />
 
