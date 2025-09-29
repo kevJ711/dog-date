@@ -8,8 +8,6 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const data = await req.json();
-  const newUser = await db.insert(User).values(data);
-  return NextResponse.json(newUser);
+  return NextResponse.json({ error: 'Use /api/auth/signup to create users' }, { status: 405 });
 }
 
