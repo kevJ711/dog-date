@@ -12,4 +12,3 @@ export async function POST(req: Request) {
   const newUser = await db.insert(User).values(data);
   return NextResponse.json(newUser);
 }
-
