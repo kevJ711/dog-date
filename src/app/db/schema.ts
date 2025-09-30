@@ -28,6 +28,7 @@ export const Message = mysqlTable("messages" , {
       receiver_id: int("receiver_id").notNull().references(() => User.id),
       content: varchar("content", { length: 1000 }).notNull(),
       timestamp: timestamp("timestamp").defaultNow().notNull(),
+
 });
 
 export const PlaydateRequests = mysqlTable("playdate_request" , {
@@ -40,6 +41,4 @@ export const PlaydateRequests = mysqlTable("playdate_request" , {
       location: varchar("location", { length: 255 }).notNull(),
       status: mysqlEnum("status", ["pending", "accepted", "declined"]).notNull().default("pending"),
 
-}
-
-)
+});
