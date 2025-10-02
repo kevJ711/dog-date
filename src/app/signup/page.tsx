@@ -210,10 +210,8 @@ export default function SignUpPage() {
              text-orange-400 shadow-md transition-all duration-300 
              hover:bg-blue-800 hover:shadow-lg hover:scale-105"
             >
-            Create Account
+              Create Account
             </button>
-
-
           </form>
 
           {/* Footer */}
@@ -221,7 +219,7 @@ export default function SignUpPage() {
             <p className="text-sm text-gray-700">
               Already have an account?{" "}
               <Link
-                href="/sign-in"
+                href="/login"
                 className="text-blue-700 hover:underline font-medium"
               >
                 Sign in
