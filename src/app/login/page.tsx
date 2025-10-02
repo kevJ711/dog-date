@@ -1,28 +1,34 @@
 "use client";
 
-<<<<<<< HEAD
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Link from "next/link";
 
 export default function Login() {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    identifier: "",
+    password: "",
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (submitting) return;
     setSubmitting(true);
 
-    const form = e.currentTarget as HTMLFormElement & {
-      username: { value: string };
-      password: { value: string };
-    };
-
     try {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier: form.username.value, password: form.password.value }),
+        body: JSON.stringify({ identifier: formData.identifier, password: formData.password }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -36,45 +42,6 @@ export default function Login() {
       alert("Network error. Please try again.");
       setSubmitting(false);
     }
-  };
-
-  return (
-    <main>
-      <div className="bg-black w-full min-h-screen flex justify-center items-center;">
-        <div className="bg-white w-[500px] p-8 rounded shadow-lg;">
-          <h1 className="text-black text-2xl font-mono;" >Log In</h1>
-          <form onSubmit={onSubmit}>
-            <label htmlFor="username" >Username</label><br />
-            <input className="box" id="username" name="username" type="text" /><br />
-            <label htmlFor="password" >Password</label><br />
-            <input className="box" id="password" name="password" type="password" /><br />
-            <button className="btn" type="submit" disabled={submitting}>
-              {submitting ? "Submitting..." : "Submit"}
-            </button>
-          </form>
-        </div>
-      </div>
-    </main>
-=======
-import { useState } from "react";
-import Link from "next/link";
-
-export default function LoginPage() {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Login attempt:", formData);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
   };
 
   return (
@@ -116,21 +83,21 @@ export default function LoginPage() {
           </p>
 
           {/* Login form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email */}
+          <form onSubmit={onSubmit} className="space-y-4">
+            {/* Email/Username */}
             <div>
               <label
-                htmlFor="email"
+                htmlFor="identifier"
                 className="block text-sm font-medium text-yellow-700"
               >
-                Email
+                Email or Username
               </label>
               <input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="john@example.com"
-                value={formData.email}
+                id="identifier"
+                name="identifier"
+                type="text"
+                placeholder="john@example.com or username"
+                value={formData.identifier}
                 onChange={handleChange}
                 required
                 className="mt-1 w-full px-3 py-2 border border-yellow-300 
@@ -166,11 +133,12 @@ export default function LoginPage() {
             {/* Submit Button */}
             <button
               type="submit"
+              disabled={submitting}
               className="w-full rounded-xl bg-blue-800 px-4 py-2 font-semibold 
              text-orange-400 shadow-md transition-all duration-300 
-             hover:bg-blue-800 hover:shadow-lg hover:scale-105"
+             hover:bg-blue-800 hover:shadow-lg hover:scale-105 disabled:opacity-50"
             >
-              Log In
+              {submitting ? "Signing In..." : "Log In"}
             </button>
           </form>
 
@@ -189,6 +157,5 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
->>>>>>> origin/feature-mariana
   );
 }
