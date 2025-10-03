@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { supabase } from "../../lib/supabase";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -13,6 +14,7 @@ export default function SignUpPage() {
     password: "",
     confirmPassword: ""
   });
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,25 +23,47 @@ export default function SignUpPage() {
       return;
     }
 
-    const name = `${formData.firstName} ${formData.lastName}`.trim();
-    const username = formData.email.split("@")[0];
+    if (formData.password.length < 8) {
+      alert("Password must be at least 8 characters");
+      return;
+    }
+
+    setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email: formData.email, username, password: formData.password }),
+      // Sign up with Supabase
+      const { error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        alert(data?.error || "Signup failed");
+
+      if (error) {
+        alert(error.message);
+        setLoading(false);
         return;
       }
-      alert("Account created. Please log in.");
+
+      // Create profile in profiles table
+      const name = `${formData.firstName} ${formData.lastName}`.trim();
+      const username = formData.email.split("@")[0];
+
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          name,
+          username,
+        });
+
+      if (profileError) {
+        console.error('Profile creation error:', profileError);
+      }
+
+      alert("Account created! Please check your email to verify your account.");
       router.push("/login");
-    } catch {
+    } catch (err) {
       alert("Network error. Please try again.");
     }
+    setLoading(false);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -206,11 +230,12 @@ export default function SignUpPage() {
             {/* Submit Button */}
             <button
               type="submit"
+              disabled={loading}
               className="w-full rounded-xl bg-blue-800 px-4 py-2 font-semibold 
              text-orange-400 shadow-md transition-all duration-300 
-             hover:bg-blue-800 hover:shadow-lg hover:scale-105"
+             hover:bg-blue-800 hover:shadow-lg hover:scale-105 disabled:opacity-50"
             >
-              Create Account
+              {loading ? "Creating Account..." : "Create Account"}
             </button>
           </form>
 

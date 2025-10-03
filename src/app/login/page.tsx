@@ -3,12 +3,13 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
+import { supabase } from "../../lib/supabase";
 
 export default function Login() {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    identifier: "",
+    email: "",
     password: "",
   });
 
@@ -25,20 +26,20 @@ export default function Login() {
     setSubmitting(true);
 
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ identifier: formData.identifier, password: formData.password }),
+      const { error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        alert(data?.error || "Login failed");
+
+      if (error) {
+        alert(error.message);
         setSubmitting(false);
         return;
       }
-      // HttpOnly cookie set by server
+      
+      // Success - redirect to home
       router.push("/");
-    } catch {
+    } catch (err) {
       alert("Network error. Please try again.");
       setSubmitting(false);
     }
@@ -84,20 +85,20 @@ export default function Login() {
 
           {/* Login form */}
           <form onSubmit={onSubmit} className="space-y-4">
-            {/* Email/Username */}
+            {/* Email */}
             <div>
               <label
-                htmlFor="identifier"
+                htmlFor="email"
                 className="block text-sm font-medium text-yellow-700"
               >
-                Email or Username
+                Email
               </label>
               <input
-                id="identifier"
-                name="identifier"
-                type="text"
-                placeholder="john@example.com or username"
-                value={formData.identifier}
+                id="email"
+                name="email"
+                type="email"
+                placeholder="john@example.com"
+                value={formData.email}
                 onChange={handleChange}
                 required
                 className="mt-1 w-full px-3 py-2 border border-yellow-300 
