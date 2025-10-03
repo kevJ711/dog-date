@@ -58,7 +58,7 @@ export default function SignUpPage() {
         console.error('Profile creation error:', profileError);
       }
 
-      alert("Account created! Please check your email to verify your account.");
+      alert("Account created! You can now log in.");
       router.push("/login");
     } catch (err) {
       alert("Network error. Please try again.");
