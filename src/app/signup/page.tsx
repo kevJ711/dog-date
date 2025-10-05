@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image"; // ✅ Import Next.js Image
 
 export default function SignUpPage() {
   const [formData, setFormData] = useState({
@@ -9,7 +10,7 @@ export default function SignUpPage() {
     lastName: "",
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -25,8 +26,10 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center 
-                    bg-gradient-to-br from-blue-100 via-blue-500 to-blue-200 p-4">
+    <div
+      className="min-h-screen flex items-center justify-center 
+                 bg-gradient-to-br from-blue-100 via-blue-500 to-blue-200 p-4"
+    >
       <div className="w-full max-w-md space-y-6">
         {/* Back link */}
         <div className="text-center">
@@ -38,14 +41,19 @@ export default function SignUpPage() {
             ← Back to home
           </Link>
 
-          {/* Placeholder logo/title */}
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <div className="w-12 h-12 flex items-center justify-center 
-                            rounded-full bg-yellow-200 text-yellow-700 
-                            font-bold text-lg">
-              DD
-            </div>
-            <h1 className="text-3xl font-bold text-yellow-100">Dog Date</h1>
+          {/* Logo and title */}
+          <div className="flex flex-col items-center justify-center gap-2 mb-2">
+            <Image
+              src="/dogdate-logo.png" // ✅ Ensure this file is in the public folder
+              alt="Dog Date Logo"
+              width={90}
+              height={90}
+              className="rounded-full shadow-lg"
+              priority
+            />
+            <h1 className="text-3xl font-bold text-yellow-100 mt-2">
+              Dog Date
+            </h1>
           </div>
 
           <p className="text-yellow-50">
@@ -182,8 +190,8 @@ export default function SignUpPage() {
             <button
               type="submit"
               className="w-full rounded-xl bg-blue-800 px-4 py-2 font-semibold 
-             text-orange-400 shadow-md transition-all duration-300 
-             hover:bg-blue-800 hover:shadow-lg hover:scale-105"
+                         text-orange-400 shadow-md transition-all duration-300 
+                         hover:bg-blue-800 hover:shadow-lg hover:scale-105"
             >
               Create Account
             </button>
