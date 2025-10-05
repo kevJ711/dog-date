@@ -1,37 +1,78 @@
+"use client";
+
 import Image from "next/image";
-//New Code
-import Link from 'next/link';
-//<Image src="/vercel.svg" alt="website icon" width={500} height={500}/>
+import Link from "next/link";
 
 export default function Home() {
   return (
-  <main className="">
-    <div id="first section" className="flex w-full items-center bg-white justify-between;">
-      <div className="flex items-start">
-        <Image src="/globe.svg" alt="website icon" width={50} height={50}/>
-        <h1 className="font-mono font-black text-2xl m-2">Dog Date</h1>
-      </div>
-      {/* Button Container */}
-      <div className="flex space-x-1 mt-4 items-end ml-auto">
-        {/* Sign Up button */}
-        <Link href="/signup">
-        <button className='btn' >Sign up</button>
-        </Link>
-        {/* Log In button */}
-        <Link href="/login">
-        <button className='btn' >Log In</button>
-        </Link>
-      </div>
-    </div>
-    <div id="Second section" className="flex bg-black items-center justify-center min-h-screen">
-      <div className="flex-col"> {/* Word content contianer */}
-        <h1 className="font-mono text-white text-4xl m-2">Introducing Dog Date</h1><br/>
-        <p className="font-mono text-white text-xl m-2">Dog Owners want safe, easy ways to find compatible playmates nearby. Existing social apps
-        are general-purpose and do not account for dog-specific preferences (size, temperament,
-        vaccination status, etc.).</p>
-      </div>
-    
-    </div>
-  </main>
+    <main className="min-h-screen flex flex-col">
+      {/* Header / Navbar */}
+      <header className="w-full bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          {/* Left: Logo and Title */}
+          <div className="flex items-center gap-4">
+            <Image
+              src="/dogdate-logo.png" // ✅ make sure this is inside /public
+              alt="Dog Date Logo"
+              width={40}
+              height={40}
+              className="object-contain rounded-full"
+            />
+            <h1 className="text-2xl font-bold text-gray-800">Dog Date</h1>
+          </div>
+
+          {/* Center Nav Links */}
+          <nav className="hidden md:flex items-center gap-6">
+            <a
+              href="#features"
+              className="text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              Features
+            </a>
+            <a
+              href="#how-it-works"
+              className="text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              How It Works
+            </a>
+            <a
+              href="#safety"
+              className="text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              Safety
+            </a>
+          </nav>
+
+          {/* Right: Buttons */}
+          <div className="flex items-center gap-3">
+            <Link
+              href="/login"
+              className="px-4 py-2 text-gray-800 hover:text-blue-600 font-medium transition"
+            >
+              Log In
+            </Link>
+            <Link
+              href="/signup"
+              className="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-white font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-transform duration-300"
+            >
+              Get Started
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section
+        id="intro"
+        className="flex flex-col items-center justify-center bg-black text-white text-center min-h-screen px-6"
+      >
+        <h1 className="font-mono text-4xl sm:text-5xl font-bold mb-4">
+          Find Play Dates for Your Companion 🐾
+        </h1>
+        <p className="font-mono text-lg sm:text-xl max-w-2xl">
+          Connect with local dog owners and discover the perfect playmates for your furry friend. Safe, easy, and tail-waggingly fun!
+        </p>
+      </section>
+    </main>
   );
 }
