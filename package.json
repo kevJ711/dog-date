@@ -9,9 +9,11 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@radix-ui/react-dropdown-menu": "^2.1.16",
     "dotenv": "^17.2.2",
     "drizzle-kit": "^0.31.4",
     "drizzle-orm": "^0.44.5",
+    "lucide-react": "^0.544.0",
     "mysql2": "^3.15.1",
     "next": "15.5.4",
     "react": "19.1.0",
