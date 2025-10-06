@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { db } from '../../db/db';
-import { Message } from '../../db/schema';
+import { db } from '../../../lib/db/db';
+import { Message } from '../../../lib/db/schema';
 
 export async function GET() {
   const messages = await db.select().from(Message);
