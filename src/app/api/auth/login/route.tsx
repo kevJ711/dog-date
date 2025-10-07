@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { db } from '../../../db/db';
-import { User } from '../../../db/schema';
+import { db } from '../../../../lib/db/db';
+import { User } from '../../../../lib/db/schema';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { eq, or } from 'drizzle-orm';
