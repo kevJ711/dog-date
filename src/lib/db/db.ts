@@ -5,7 +5,7 @@ const poolConnection = mysql.createPool({
     host: "localhost",
     user: "root",
     database: "dogdate_db",
-    password: "password"
+    password: ""
 });
 
 const db = drizzle(poolConnection);

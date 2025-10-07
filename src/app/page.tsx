@@ -1,5 +1,5 @@
-import { GHomepage } from "./components/GHomepage";
-import { UHomepage } from "./components/UHomepage";
+import { GHomepage } from "../components/ui/GHomepage";
+import { UHomepage } from "../components/ui/UHomepage";
 
 export default function Home() {
     const loggedIn = true;
@@ -12,5 +12,6 @@ export default function Home() {
 
   return (
     <UHomepage/>
+
   );
 }

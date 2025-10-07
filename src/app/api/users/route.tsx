@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { db } from '../../db/db';
-import { User } from '../../db/schema';
+import { db } from '../../../lib/db/db';
+import { User } from '../../../lib/db/schema';
 
 export async function GET() {
   const allUsers = await db.select().from(User);
@@ -8,8 +8,5 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const data = await req.json();
-  const newUser = await db.insert(User).values(data);
-  return NextResponse.json(newUser);
+  return NextResponse.json({ error: 'Use /api/auth/signup to create users' }, { status: 405 });
 }
-
