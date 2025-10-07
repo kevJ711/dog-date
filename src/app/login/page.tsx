@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image"; // ✅ import Next.js Image
+import Header from '../../components/ui/Header';
 
 export default function Login() {
   const router = useRouter();
@@ -46,6 +47,7 @@ export default function Login() {
   };
 
   return (
+    <><Header/>
     <div
       className="min-h-screen flex items-center justify-center 
                  bg-gradient-to-br from-blue-100 via-blue-500 to-blue-200 p-4"
@@ -162,6 +164,6 @@ export default function Login() {
           </div>
         </div>
       </div>
-    </div>
+    </div></>
   );
 }
