@@ -3,7 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
-import { supabase } from "../../lib/supabase";
+import Image from "next/image"; 
+import Header from "../../components/ui/Header"; 
+import { supabase } from "../../lib/supabase"; 
 
 export default function Login() {
   const router = useRouter();
@@ -36,8 +38,8 @@ export default function Login() {
         setSubmitting(false);
         return;
       }
-      
-      // Success - redirect to home
+
+      // ✅ Success - redirect to home
       router.push("/");
     } catch (err) {
       alert("Network error. Please try again.");
@@ -46,8 +48,11 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center 
-                    bg-gradient-to-br from-blue-100 via-blue-500 to-blue-200 p-4">
+    <><Header/>
+    <div
+      className="min-h-screen flex items-center justify-center 
+                 bg-gradient-to-br from-blue-100 via-blue-500 to-blue-200 p-4"
+    >
       <div className="w-full max-w-md space-y-6">
         {/* Back link */}
         <div className="text-center">
@@ -59,18 +64,21 @@ export default function Login() {
             ← Back to home
           </Link>
 
-          {/* Placeholder logo/title */}
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <div className="w-12 h-12 flex items-center justify-center 
-                            rounded-full bg-yellow-200 text-yellow-700 
-                            font-bold text-lg">
-              DD
-            </div>
+          {/* Logo and title */}
+          <div className="flex flex-col items-center justify-center gap-2 mb-2">
+            <Image
+              src="/dogdate-logo.png" // ✅ path to logo in public folder
+              alt="Dog Date Logo"
+              width={80}
+              height={80}
+              className="rounded-full shadow-md"
+              priority
+            />
             <h1 className="text-3xl font-bold text-yellow-100">Dog Date</h1>
           </div>
 
           <p className="text-yellow-50">
-            Welcome back! Sign in to your account 
+            Welcome back! Sign in to your account
           </p>
         </div>
 
@@ -137,7 +145,7 @@ export default function Login() {
               disabled={submitting}
               className="w-full rounded-xl bg-blue-800 px-4 py-2 font-semibold 
              text-orange-400 shadow-md transition-all duration-300 
-             hover:bg-blue-800 hover:shadow-lg hover:scale-105 disabled:opacity-50"
+             hover:bg-blue-800 hover:shadow-lg hover:scale-105"
             >
               {submitting ? "Signing In..." : "Log In"}
             </button>
@@ -157,6 +165,6 @@ export default function Login() {
           </div>
         </div>
       </div>
-    </div>
+    </div></>
   );
 }
