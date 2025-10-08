@@ -1,10 +1,10 @@
 "use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "../../lib/supabase";
 import Image from "next/image"; // ✅ Import Next.js Image
-import Header from '../../components/ui/Header';
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -75,7 +75,6 @@ export default function SignUpPage() {
   };
 
   return (
-    <><Header/>
     <div
       className="min-h-screen flex items-center justify-center 
                  bg-gradient-to-br from-blue-100 via-blue-500 to-blue-200 p-4"
@@ -107,7 +106,7 @@ export default function SignUpPage() {
           </div>
 
           <p className="text-yellow-50">
-            Get started with Dog Date and find your pups new best friends
+            Get started with Dog Date and find your pup's new best friends
           </p>
         </div>
 
@@ -262,6 +261,6 @@ export default function SignUpPage() {
           </div>
         </div>
       </div>
-    </div></>
+    </div>
   );
 }
