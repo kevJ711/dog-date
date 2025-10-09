@@ -4,9 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image"; 
-import Header from "../../components/ui/Header"; 
-import { supabase } from "../../lib/supabase"; 
-import Image from "next/image"; // ✅ import Next.js Image
+import { supabase } from "../../lib/supabase";
 
 export default function Login() {
   const router = useRouter();
