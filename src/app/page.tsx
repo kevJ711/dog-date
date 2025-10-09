@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { Heart, Calendar } from "lucide-react";
+import Footer from "@/components/footer"; // ✅ import the Footer component
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-700 via-blue-300 to-blue-900 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-blue-500 to-blue-200 flex flex-col">
       {/* Main Content */}
       <section className="flex-1 flex flex-col items-center justify-center text-center text-white px-6">
         <h1 className="text-4xl md:text-5xl font-bold mb-4 text-purple-900">
@@ -13,7 +14,7 @@ export default function Home() {
           Connect with local dog owners and discover the perfect playmates for your furry friend. Safe, easy, and tail-waggingly fun!
         </p>
 
-        {/* ✅ New Section Below the Paragraph */}
+        {/* ✅ Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Link
             href="/get-started"
@@ -29,6 +30,9 @@ export default function Home() {
           </Link>
         </div>
       </section>
+
+      {/* ✅ Add Footer */}
+      <Footer />
     </div>
   );
 }
