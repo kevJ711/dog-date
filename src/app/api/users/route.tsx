@@ -1,10 +1,20 @@
 import { NextResponse } from 'next/server';
-import { db } from '../../../lib/db/db';
-import { User } from '../../../lib/db/schema';
+import { supabase } from '../../../lib/supabase';
 
 export async function GET() {
-  const allUsers = await db.select().from(User);
-  return NextResponse.json(allUsers);
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*');
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json(data);
+  } catch (err) {
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
 }
 
 export async function POST(req: Request) {
