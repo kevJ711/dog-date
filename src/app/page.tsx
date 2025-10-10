@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Heart, Calendar } from "lucide-react";
 
 export default function Home() {
+  const loggedIn = false;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-700 via-blue-300 to-blue-900 flex flex-col">
       {/* Main Content */}

@@ -1,15 +1,12 @@
 import { NextResponse } from 'next/server';
-import { db } from '../../../../lib/db/db';
-import { User } from '../../../../lib/db/schema';
-import bcrypt from 'bcryptjs';
-import { eq, or } from 'drizzle-orm';
+import { supabase } from '../../../../lib/supabase';
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, email, username, password } = body ?? {};
+    const { email, password } = body ?? {};
 
-    if (!name || !email || !username || !password) {
+    if (!email || !password) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -21,18 +18,20 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 });
     }
 
-    const existing = await db
-      .select()
-      .from(User)
-      .where(or(eq(User.email, email), eq(User.username, username)));
-    if (existing.length > 0) {
-      return NextResponse.json({ error: 'Email or username already in use' }, { status: 409 });
+    // Use Supabase auth for signup
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+    });
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
-    const hashed = await bcrypt.hash(password, 10);
-    await db.insert(User).values({ name, email, username, password: hashed });
-
-    return NextResponse.json({ message: 'User created' }, { status: 201 });
+    return NextResponse.json({ 
+      message: 'User created successfully', 
+      user: data.user 
+    }, { status: 201 });
   } catch (err) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
