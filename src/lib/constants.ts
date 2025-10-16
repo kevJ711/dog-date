@@ -8,6 +8,8 @@ export const API_ENDPOINTS = {
   USERS: '/api/users',
   DOGS: '/api/dog',
   MESSAGES: '/api/messages',
+  LIKES: '/api/likes',
+  PLAYDATES: '/api/playdates',
   IMAGES: '/api/images',
 } as const;
 

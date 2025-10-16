@@ -1,49 +1,50 @@
 // Database Types
 export interface User {
-  id: number;
+  id: string; // UUID
   name: string;
-  email: string;
-  password_hash: string;
+  username: string;
   bio?: string;
   location?: string;
-  available_times?: string;
   created_at: Date;
-  updated_at: Date;
 }
 
 export interface Dog {
-  id: number;
-  owner_id: number;
+  id: string; // UUID
+  owner_id: string; // UUID
   name: string;
-  sex: 'Male' | 'Female';
   breed: string;
   age: number;
-  size: 'Small' | 'Medium' | 'Large';
+  size: string;
   temperament?: string;
   vaccination_status: string;
   photo_url?: string;
   created_at: Date;
-  updated_at: Date;
 }
 
 export interface PlaydateRequest {
-  id: number;
-  sender_id: number;
-  receiver_id: number;
-  dog_id: number;
-  date: Date;
+  id: string; // UUID
+  sender_id: string; // UUID
+  receiver_id: string; // UUID
+  dog_id: string; // UUID
+  date: string;
   time: string;
   location: string;
   status: 'pending' | 'accepted' | 'rejected';
   created_at: Date;
-  updated_at: Date;
 }
 
 export interface Message {
-  id: number;
-  sender_id: number;
-  receiver_id: number;
+  id: string; // UUID
+  sender_id: string; // UUID
+  receiver_id: string; // UUID
   content: string;
+  created_at: Date;
+}
+
+export interface Like {
+  id: string; // UUID
+  from_dog_id: string; // UUID
+  to_dog_id: string; // UUID
   created_at: Date;
 }
 
@@ -80,8 +81,8 @@ export interface DogForm {
 }
 
 export interface PlaydateRequestForm {
-  receiver_id: number;
-  dog_id: number;
+  receiver_id: string; // UUID
+  dog_id: string; // UUID
   date: string;
   time: string;
   location: string;
