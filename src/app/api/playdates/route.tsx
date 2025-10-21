@@ -3,9 +3,18 @@ import { supabase } from '../../../lib/supabase';
 
 export async function GET() {
   try {
+    // Get authenticated user
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { data, error } = await supabase
-      .from('dogs')
-      .select('*');
+      .from('playdate_requests')
+      .select('*')
+      .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+      .order('created_at', { ascending: false });
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
@@ -27,23 +36,22 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { name, breed, age, size, temperament, vaccination_status, photo_url } = body;
+    const { receiver_id, dog_id, date, time, location } = body;
 
-    if (!name || !breed || !age) {
+    if (!receiver_id || !dog_id || !date || !time || !location) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     const { data, error } = await supabase
-      .from('dogs')
+      .from('playdate_requests')
       .insert({
-        owner_id: user.id,
-        name,
-        breed,
-        age,
-        size,
-        temperament,
-        vaccination_status,
-        photo_url
+        sender_id: user.id,
+        receiver_id,
+        dog_id,
+        date,
+        time,
+        location,
+        status: 'pending'
       })
       .select();
 
@@ -57,7 +65,7 @@ export async function POST(req: Request) {
   }
 }
 
-export async function DELETE(req: Request) {
+export async function PATCH(req: Request) {
   try {
     // Get authenticated user
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -66,39 +74,40 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = await req.json();
-    
-    if (!id) {
-      return NextResponse.json({ error: 'Dog ID required' }, { status: 400 });
+    const body = await req.json();
+    const { id, status } = body;
+
+    if (!id || !status) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    // First check if the dog belongs to the authenticated user
-    const { data: dog, error: fetchError } = await supabase
-      .from('dogs')
-      .select('owner_id')
+    // First check if the user is the receiver of this playdate request
+    const { data: playdate, error: fetchError } = await supabase
+      .from('playdate_requests')
+      .select('receiver_id')
       .eq('id', id)
       .single();
 
-    if (fetchError || !dog) {
-      return NextResponse.json({ error: 'Dog not found' }, { status: 404 });
+    if (fetchError || !playdate) {
+      return NextResponse.json({ error: 'Playdate request not found' }, { status: 404 });
     }
 
-    if (dog.owner_id !== user.id) {
-      return NextResponse.json({ error: 'Unauthorized to delete this dog' }, { status: 403 });
+    if (playdate.receiver_id !== user.id) {
+      return NextResponse.json({ error: 'Unauthorized to update this playdate request' }, { status: 403 });
     }
 
-    const { error } = await supabase
-      .from('dogs')
-      .delete()
-      .eq('id', id);
+    const { data, error } = await supabase
+      .from('playdate_requests')
+      .update({ status })
+      .eq('id', id)
+      .select();
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json({ message: "Dog deleted successfully" });
+    return NextResponse.json(data[0]);
   } catch (err) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
-
