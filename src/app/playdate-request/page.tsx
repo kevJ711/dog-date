@@ -90,6 +90,24 @@ export default function PlaydateRequestPage() {
             if (!ownerError && ownerData) {
               setTargetOwner(ownerData);
             }
+          } else {
+            // If dog not found in database, it's likely a dummy card from discover page
+            // Create a mock dog object for display purposes
+            const mockDogs: { [key: string]: any } = {
+              '1234': { id: '1234', name: 'Bailey', owner_id: 'mock-owner', breed: 'Golden Retriever' },
+              '1': { id: '1', name: 'Buddy', owner_id: 'mock-owner', breed: 'Unknown' },
+              '2': { id: '2', name: 'Max', owner_id: 'mock-owner', breed: 'Unknown' }
+            };
+
+            if (mockDogs[dogIdFromUrl]) {
+              setTargetDog(mockDogs[dogIdFromUrl]);
+              setTargetOwner({ 
+                id: 'mock-owner', 
+                username: 'dog_owner', 
+                name: 'Dog Owner', 
+                location: 'Unknown' 
+              });
+            }
           }
         }
       } catch (error) {
@@ -135,6 +153,13 @@ export default function PlaydateRequestPage() {
     e.preventDefault();
     
     if (!validateForm() || !targetDog) {
+      return;
+    }
+
+    // Check if this is a mock/dummy dog
+    if (targetDog.owner_id === 'mock-owner') {
+      alert('This is a demo profile. Please select a real dog from the browse page to request a playdate.');
+      router.push('/browse');
       return;
     }
 
