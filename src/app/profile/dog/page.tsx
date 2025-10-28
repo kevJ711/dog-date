@@ -138,22 +138,43 @@ export default function DogProfilePage() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        // Prepare data, excluding empty photo_url
+        const dogData = {
+          owner_id: user.id,
+          name: formData.name,
+          breed: formData.breed,
+          age: formData.age || 0,
+          size: formData.size,
+          temperament: formData.temperament || null,
+          vaccination_status: formData.vaccination_status,
+          ...(formData.photo_url && { photo_url: formData.photo_url })
+        };
+
         const { error } = await supabase
           .from('dogs')
-          .insert({
-            owner_id: user.id,
-            ...formData
-          });
+          .insert(dogData);
 
         if (error) {
-          console.error('Failed to create dog:', error);
+          console.error('Failed to create dog:', error.message || error);
+          alert(`Failed to create dog: ${error.message || 'Unknown error'}`);
         } else {
           setAdding(false);
           fetchDogs(); // Refresh data
+          // Reset form
+          setFormData({
+            name: '',
+            breed: '',
+            age: 0,
+            size: 'Medium',
+            temperament: '',
+            vaccination_status: 'Up to date',
+            photo_url: ''
+          });
         }
       }
     } catch (err) {
       console.error('Failed to create dog:', err);
+      alert('Failed to create dog. Please try again.');
     }
   };
 
@@ -200,8 +221,8 @@ export default function DogProfilePage() {
                   <label className="block text-sm font-medium text-gray-900">Age</label>
                   <input
                     type="number"
-                    value={formData.age}
-                    onChange={(e) => setFormData({...formData, age: parseInt(e.target.value)})}
+                    value={formData.age || ''}
+                    onChange={(e) => setFormData({...formData, age: parseInt(e.target.value) || 0})}
                     className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 bg-white"
                   />
                 </div>
