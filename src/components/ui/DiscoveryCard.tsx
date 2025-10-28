@@ -1,38 +1,58 @@
 'use client';
 
 import Link from "next/link";
+import { Dog } from '@/types';
+import { useDogStore } from '@/lib/stores/dog-store';
 
-type DiscoveryCardProps = {
-    dogId: string;
-    dogName: string;
-    dogTemp: string;
-    avalibility: string;
-    dogBio: string;
-    className?: string;
-    likeButton: React.ReactNode;
-    expandButton: React.ReactNode;
-};
+export default function DiscoveryCard({ dog }: { dog: Dog }) {
+   const likeDog = useDogStore(s => s.likeDog);
+   const unlikeDog = useDogStore(s => s.unlikeDog);
+   const likedDogs = useDogStore(s => s.likedDogs);
+   const setSelectedDog = useDogStore(s => s.setSelectedDog);
 
-export default function DiscoveryCard({dogId, dogName, dogTemp, avalibility, dogBio, likeButton, expandButton} : DiscoveryCardProps) {
+   const isLiked = likedDogs.includes(dog.id);
+
+   const onToggleLike = async () => {
+     setSelectedDog(dog);
+     if (isLiked) {
+       await unlikeDog(dog.id);
+     } else {
+       await likeDog(dog.id);
+     }
+   };
+
    return(
-    <div className="w-full h-full">
-        <div className="bg-white w-auto rounded-3xl shadow-lg border-2 p-8 pt-2 pb-2 ">
-                <div className="flex flex-row justify-end  bg-gray border-b p-3 border-gray-200">
-                    {expandButton}
-                </div>
-                <div className="p-6 h-64 overflow-y-auto"> 
+    <div className="p-8">
+        <div className="bg-white w-auto rounded-3xl shadow-lg;">
+                <div className="p-8"> 
+                    {dog.photo_url && (
+                      <div className="mb-4 flex justify-center">
+                        <img
+                          src={dog.photo_url}
+                          alt={dog.name}
+                          className="w-32 h-32 object-cover rounded-full"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    )}
                     <h1 className="text-black text-xl font-mono font-light;" >Meet: </h1>
-                    <h2>{ dogName }</h2>
-                    <h1 className="text-black text-xl font-mono font-light;" >Temperment: </h1>
-                    <h2>{ dogTemp }</h2>
-                    <h1 className="text-black text-xl font-mono font-light;" >Times Avalible: </h1>
-                    <h2>{ avalibility }</h2>
-                    <h1 className="text-black text-xl font-mono font-light;" >Bio: </h1>
-                    <h2>{ dogBio }</h2> 
+                    <h2>{ dog.name }</h2>
+                    <h1 className="text-black text-xl font-mono font-light;" >Temperament: </h1>
+                    <h2>{ dog.temperament ?? '—' }</h2>
+                    <h1 className="text-black text-xl font-mono font-light;" >Breed: </h1>
+                    <h2>{ dog.breed }</h2>
+                    <h1 className="text-black text-xl font-mono font-light;" >Age: </h1>
+                    <h2>{ dog.age } years old</h2>
+                    <h1 className="text-black text-xl font-mono font-light;" >Size: </h1>
+                    <h2>{ dog.size }</h2>
                 </div>
-            <div id="bottomsection" className="flex flex-row justify-between items-center bg-gray border-t p-3 border-gray-200">
-                <div>{likeButton}</div>
-                <Link href="" className="text-l">Request a playdate! → </Link>
+            <div id="bottomsection" className="bg-gray border-t p-3 border-gray-200 flex flex-row justify-between items-center">
+                <button onClick={onToggleLike} className="text-center text-l hover:text-blue-600 transition-colors">
+                  {isLiked ? 'Unlike' : 'Like'} →
+                </button>
+                <Link href={`/playdate-request?dogId=${dog.id}`} className="text-l hover:text-blue-600 transition-colors">Request a playdate! → </Link>
             </div>          
         </div>
     </div>

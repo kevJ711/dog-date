@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { Dog } from '@/types';
+import { API_ENDPOINTS } from '@/lib/constants';
 
 interface DogFilters {
   breed?: string;
@@ -14,7 +15,7 @@ interface DogState {
   filteredDogs: Dog[];
   filters: DogFilters;
   selectedDog: Dog | null;
-  likedDogs: number[];
+	likedDogs: string[];
   isLoading: boolean;
   
   // Actions
@@ -22,10 +23,11 @@ interface DogState {
   setFilters: (filters: Partial<DogFilters>) => void;
   clearFilters: () => void;
   setSelectedDog: (dog: Dog | null) => void;
-  likeDog: (dogId: number) => void;
-  unlikeDog: (dogId: number) => void;
+	likeDog: (dogId: string) => Promise<void>;
+	unlikeDog: (dogId: string) => Promise<void>;
   setLoading: (loading: boolean) => void;
   applyFilters: () => void;
+	fetchDogs: () => Promise<void>;
 }
 
 const defaultFilters: DogFilters = {
@@ -41,7 +43,7 @@ export const useDogStore = create<DogState>((set, get) => ({
   filteredDogs: [],
   filters: defaultFilters,
   selectedDog: null,
-  likedDogs: [],
+	likedDogs: [],
   isLoading: false,
   
   setDogs: (dogs: Dog[]) => {
@@ -60,21 +62,60 @@ export const useDogStore = create<DogState>((set, get) => ({
     get().applyFilters();
   },
   
-  setSelectedDog: (dog: Dog | null) => {
+	setSelectedDog: (dog: Dog | null) => {
     set({ selectedDog: dog });
   },
-  
-  likeDog: (dogId: number) => {
-    const { likedDogs } = get();
-    if (!likedDogs.includes(dogId)) {
-      set({ likedDogs: [...likedDogs, dogId] });
-    }
-  },
-  
-  unlikeDog: (dogId: number) => {
-    const { likedDogs } = get();
-    set({ likedDogs: likedDogs.filter(id => id !== dogId) });
-  },
+
+	likeDog: async (dogId: string) => {
+		const state = get();
+		// optimistically update
+		if (!state.likedDogs.includes(dogId)) {
+			set({ likedDogs: [...state.likedDogs, dogId] });
+		}
+		try {
+			// We need a from_dog_id owned by the user; use selected dog if available
+			const fromDogId = state.selectedDog?.id;
+			if (!fromDogId) {
+				// Revert optimistic update if we cannot determine from_dog_id
+				set({ likedDogs: state.likedDogs.filter(id => id !== dogId) });
+				throw new Error('No selected dog to like from');
+			}
+			await fetch(API_ENDPOINTS.LIKES, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ from_dog_id: fromDogId, to_dog_id: dogId })
+			});
+		} catch (err) {
+			// rollback on error
+			set({ likedDogs: get().likedDogs.filter(id => id !== dogId) });
+			throw err;
+		}
+	},
+	
+	unlikeDog: async (dogId: string) => {
+		const state = get();
+		// optimistically update
+		if (state.likedDogs.includes(dogId)) {
+			set({ likedDogs: state.likedDogs.filter(id => id !== dogId) });
+		}
+		try {
+			const fromDogId = state.selectedDog?.id;
+			if (!fromDogId) {
+				throw new Error('No selected dog to unlike from');
+			}
+			await fetch(API_ENDPOINTS.LIKES, {
+				method: 'DELETE',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ from_dog_id: fromDogId, to_dog_id: dogId })
+			});
+		} catch (err) {
+			// rollback on error
+			if (!get().likedDogs.includes(dogId)) {
+				set({ likedDogs: [...get().likedDogs, dogId] });
+			}
+			throw err;
+		}
+	},
   
   setLoading: (loading: boolean) => {
     set({ isLoading: loading });
@@ -107,5 +148,19 @@ export const useDogStore = create<DogState>((set, get) => ({
     
     set({ filteredDogs: filtered });
   },
+
+	fetchDogs: async () => {
+		set({ isLoading: true });
+		try {
+			const res = await fetch(API_ENDPOINTS.DOGS, { method: 'GET' });
+			if (!res.ok) {
+				throw new Error('Failed to fetch dogs');
+			}
+			const dogs: Dog[] = await res.json();
+			set({ dogs, filteredDogs: dogs });
+		} finally {
+			set({ isLoading: false });
+		}
+	},
 }));
 
