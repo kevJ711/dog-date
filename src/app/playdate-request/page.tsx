@@ -91,23 +91,10 @@ export default function PlaydateRequestPage() {
               setTargetOwner(ownerData);
             }
           } else {
-            // If dog not found in database, it's likely a dummy card from discover page
-            // Create a mock dog object for display purposes
-            const mockDogs: { [key: string]: any } = {
-              '1234': { id: '1234', name: 'Bailey', owner_id: 'mock-owner', breed: 'Golden Retriever' },
-              '1': { id: '1', name: 'Buddy', owner_id: 'mock-owner', breed: 'Unknown' },
-              '2': { id: '2', name: 'Max', owner_id: 'mock-owner', breed: 'Unknown' }
-            };
-
-            if (mockDogs[dogIdFromUrl]) {
-              setTargetDog(mockDogs[dogIdFromUrl]);
-              setTargetOwner({ 
-                id: 'mock-owner', 
-                username: 'dog_owner', 
-                name: 'Dog Owner', 
-                location: 'Unknown' 
-              });
-            }
+            console.error('Dog not found:', dogIdFromUrl, dogError);
+            // Dog not found in database
+            setTargetDog(null);
+            setTargetOwner(null);
           }
         }
       } catch (error) {
@@ -153,13 +140,6 @@ export default function PlaydateRequestPage() {
     e.preventDefault();
     
     if (!validateForm() || !targetDog) {
-      return;
-    }
-
-    // Check if this is a mock/dummy dog
-    if (targetDog.owner_id === 'mock-owner') {
-      alert('This is a demo profile. Please select a real dog from the browse page to request a playdate.');
-      router.push('/browse');
       return;
     }
 
@@ -216,10 +196,22 @@ export default function PlaydateRequestPage() {
   if (!targetDog) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-100 via-blue-500 to-blue-200 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-white mb-4">No Dog Selected</h2>
-          <p className="text-white/80 mb-6">Please go back and select a dog to request a playdate.</p>
-          <Button onClick={() => router.push('/browse')} className="bg-white text-blue-600 hover:bg-white/90">
+        <div className="text-center bg-white/10 backdrop-blur-sm p-8 rounded-lg max-w-md mx-4">
+          <div className="mb-4">
+            <svg className="w-16 h-16 text-white/80 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-4">Dog Not Found</h2>
+          <p className="text-white/80 mb-6">
+            {dogIdFromUrl 
+              ? "The dog you're looking for couldn't be found. It may have been removed or the link is invalid."
+              : "No dog was selected. Please browse available dogs and select one to request a playdate."}
+          </p>
+          <Button 
+            onClick={() => router.push('/browse')} 
+            className="bg-white text-blue-600 hover:bg-white/90 font-medium"
+          >
             Browse Dogs
           </Button>
         </div>
