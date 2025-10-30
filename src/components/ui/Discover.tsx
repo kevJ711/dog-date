@@ -223,11 +223,11 @@ export default function Discover() {
           <p className="text-white text-lg mt-2">Check back later for new furry friends.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-[repeat(auto-fit,_minmax(400px,_1fr))] p-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 auto-rows-fr p-3 gap-6">
           {dogs.map((dog) => (
             <div
               key={dog.id}
-              className="cursor-pointer"
+              className="cursor-pointer h-full"
             >
               <DiscoveryCard
                 dogId={dog.id}

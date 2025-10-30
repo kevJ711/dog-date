@@ -18,8 +18,8 @@ type DiscoveryCardProps = {
 
 export default function DiscoveryCard({dogId, dogName, dogTemp, avalibility, dogBio, photoUrl, ownerName, likeButton, expandButton} : DiscoveryCardProps) {
    return(
-    <div className="aspect-[1/1] w-full h-full">
-        <div className="bg-white w-auto rounded-3xl shadow-lg border-2 overflow-hidden">
+    <div className="w-full h-full">
+        <div className="bg-white w-auto h-full rounded-3xl shadow-lg border-2 overflow-hidden flex flex-col">
                 <div className="flex flex-row justify-end bg-gray-100 border-b p-3 border-gray-200">
                     {expandButton}
                 </div>
@@ -58,7 +58,7 @@ export default function DiscoveryCard({dogId, dogName, dogTemp, avalibility, dog
                         </div>
                     )}
                 </div>
-                <div className="p-6 h-64 overflow-y-auto"> 
+                <div className="p-6 flex-1 overflow-y-auto"> 
                     <h1 className="text-black text-xl font-mono font-light;" >Meet: </h1>
                     <h2 className="text-gray-800 text-lg font-medium mb-1">{ dogName }</h2>
                     {ownerName && (
