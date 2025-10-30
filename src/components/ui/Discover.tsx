@@ -223,7 +223,7 @@ export default function Discover() {
           <p className="text-white text-lg mt-2">Check back later for new furry friends.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-[repeat(auto-fit,_minmax(200px,_1fr))] p-3 gap-4">
+        <div className="grid grid-cols-[repeat(auto-fit,_minmax(400px,_1fr))] p-3 gap-4">
           {dogs.map((dog) => (
             <div
               key={dog.id}
@@ -244,8 +244,8 @@ export default function Discover() {
                   </button>
                 }
                 likeButton={
-              <button onClick={() => toggleLike(dog.id)} className={`border-2 rounded-full border-gray-600 cursor-pointer p-1 transition-transform duration-300 ease-in-out ${animatedCards[dog.id] ? 'scale-125' : 'scale-100'}`}>
-                <svg fill={likedCards[dog.id] ? 'pink': 'none' } stroke={likedCards[dog.id] ? 'black': 'gray'} width="32" height="32" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <button onClick={() => toggleLike(dog.id)} className={`border-1 rounded-full border-gray-600 cursor-pointer p-1 transition-transform duration-300 ease-in-out ${animatedCards[dog.id] ? 'scale-125 rotate-360' : 'scale-100 rotate-0'}`}>
+                <svg fill={likedCards[dog.id] ? '#f99716' : 'transparent' } stroke={likedCards[dog.id] ? '#f99716': 'gray'} width="32" height="32" viewBox="0 0 24 24" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                 </svg>
               </button>
@@ -297,8 +297,8 @@ export default function Discover() {
                 </button>
               }
           likeButton={
-            <button onClick={() => toggleLike(dog.id)} className={`border-2 rounded-full border-gray-600 cursor-pointer p-1 transition-transform duration-300 ease-in-out ${animatedCards[dog.id] ? 'scale-125' : 'scale-100'}`}>
-              <svg fill={likedCards[dog.id] ? 'pink': 'none' } stroke={likedCards[dog.id] ? 'black': 'gray'} width="32" height="32" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <button onClick={() => toggleLike(dog.id)} className={`border-1 rounded-full border-gray-600 cursor-pointer p-1 transition-transform duration-300 ease-in-out ${animatedCards[dog.id] ? 'scale-125 rotate-360' : 'scale-100 rotate-0'}`}>
+              <svg fill={likedCards[dog.id] ? '#f99716' : 'transparent' } stroke={likedCards[dog.id] ? '#f99716': 'gray'} width="32" height="32" viewBox="0 0 24 24" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
               </svg>
             </button>

@@ -18,8 +18,8 @@ type DiscoveryCardProps = {
 
 export default function DiscoveryCard({dogId, dogName, dogTemp, avalibility, dogBio, photoUrl, ownerName, likeButton, expandButton} : DiscoveryCardProps) {
    return(
-    <div className="w-full h-full">
-        <div className="bg-white w-auto rounded-3xl shadow-lg border-2 p-8 pt-2 pb-2 ">
+    <div className="aspect-[1/1] w-full h-full">
+        <div className="bg-white w-auto rounded-3xl shadow-lg border-2 overflow-hidden">
                 <div className="flex flex-row justify-end bg-gray-100 border-b p-3 border-gray-200">
                     {expandButton}
                 </div>
@@ -71,7 +71,7 @@ export default function DiscoveryCard({dogId, dogName, dogTemp, avalibility, dog
                     <h1 className="text-black text-xl font-mono font-light;" >Bio: </h1>
                     <h2 className="text-gray-800 text-lg font-medium">{ dogBio }</h2> 
                 </div>
-             <div id="bottomsection" className="flex flex-row justify-between items-center bg-gray-100 border-t p-3 border-gray-200">
+             <div id="bottomsection" className=" w-full flex flex-row justify-between items-center bg-gray-100 border-t border-gray-200 p-3">
                  <div>{likeButton}</div>
                  <Link href={`/playdate-request?dogId=${dogId}`} className="text-gray-800 text-lg font-medium hover:text-blue-600 transition-colors">Request a playdate! → </Link>
              </div>
