@@ -1,193 +1,234 @@
-"use client";
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+'use client';
 
-interface UserProfile {
-  id: string;
-  name: string;
-  username: string;
-  bio?: string;
-  location?: string;
-  created_at: string;
-}
+import React, { useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+
+
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+
+import { Footer } from '@/components/layout/footer';
+
 
 export default function OwnerProfilePage() {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(false);
-  const [formData, setFormData] = useState({
+  const [form, setForm] = useState({
     name: '',
+    username: '',
+    email: '',
+    phone: '',
+    city: '',
     bio: '',
-    location: ''
+    preferredRadius: 10,
+    allowMessages: true,
   });
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const fetchProfile = async () => {
-    try {
-      setLoading(true);
-      // Get current user's profile
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      
-      if (authError) {
-        console.error('Auth error:', authError);
-        return;
-      }
-      
-      if (!user) {
-        console.log('No user found');
-        return;
-      }
-
-      console.log('User ID:', user.id);
-      
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-
-      if (error) {
-        console.error('Failed to fetch profile:', error);
-        // If no profile exists, create a basic one
-        if (error.code === 'PGRST116') {
-          console.log('No profile found, creating one...');
-          const { data: newProfile, error: createError } = await supabase
-            .from('profiles')
-            .insert({
-              id: user.id,
-              name: user.email?.split('@')[0] || 'User',
-              username: user.email?.split('@')[0] || 'user'
-            })
-            .select()
-            .single();
-            
-          if (createError) {
-            console.error('Failed to create profile:', createError);
-          } else {
-            setProfile(newProfile);
-            setFormData({
-              name: newProfile.name || '',
-              bio: newProfile.bio || '',
-              location: newProfile.location || ''
-            });
-          }
-        }
-      } else {
-        console.log('Profile found:', data);
-        setProfile(data);
-        setFormData({
-          name: data.name || '',
-          bio: data.bio || '',
-          location: data.location || ''
-        });
-      }
-    } catch (err) {
-      console.error('Failed to fetch profile:', err);
-    } finally {
-      setLoading(false);
+  const onChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const target = e.target as HTMLInputElement;
+    const { name, value, type, checked } = target;
+    if (type === 'checkbox') {
+      setForm(f => ({ ...f, [name]: checked }));
+    } else if (type === 'number') {
+      setForm(f => ({ ...f, [name]: Number(value) }));
+    } else {
+      setForm(f => ({ ...f, [name]: value }));
     }
   };
 
-  const handleSave = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { error } = await supabase
-          .from('profiles')
-          .update(formData)
-          .eq('id', user.id);
-
-        if (error) {
-          console.error('Failed to update profile:', error);
-        } else {
-          setEditing(false);
-          fetchProfile(); // Refresh data
-        }
-      }
-    } catch (err) {
-      console.error('Failed to update profile:', err);
-    }
+  const onSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Save owner profile →', form);
+    alert('Owner profile saved! (connect to your API)');
   };
-
-  if (loading) return <div>Loading profile...</div>;
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Owner Profile</h1>
-        
-        {profile ? (
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            {editing ? (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-900">Name</label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 bg-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-900">Bio</label>
-                  <textarea
-                    value={formData.bio}
-                    onChange={(e) => setFormData({...formData, bio: e.target.value})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 bg-white"
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-900">Location</label>
-                  <input
-                    type="text"
-                    value={formData.location}
-                    onChange={(e) => setFormData({...formData, location: e.target.value})}
-                    className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 bg-white"
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleSave}
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                  >
-                    Save
-                  </button>
-                  <button
-                    onClick={() => setEditing(false)}
-                    className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900">{profile.name}</h2>
-                    <p className="text-gray-600">@{profile.username}</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Owner Profile</h1>
+        <p className="text-gray-600 mb-8">Manage your personal information!</p>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <aside className="lg:col-span-1 space-y-6">
+            <Card>
+              <CardHeader>
+                <h2 className="text-lg font-semibold text-gray-900">Your Profile</h2>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-4">
+                  <div className="relative h-20 w-20 rounded-full overflow-hidden ring-2 ring-white bg-gray-100">
+                    <Image
+                      src="/avatars/default-dog-owner.png"
+                      alt="Owner avatar"
+                      fill
+                      className="object-cover"
+                    />
                   </div>
-                  <button
-                    onClick={() => setEditing(true)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                  >
-                    Edit Profile
-                  </button>
+                  <div>
+                    <div className="text-gray-900 font-medium">{form.name || 'Your Name'}</div>
+                    <div className="text-gray-500">@{form.username || 'username'}</div>
+                  </div>
                 </div>
-                {profile.bio && <p className="text-gray-700 mb-2">{profile.bio}</p>}
-                {profile.location && <p className="text-gray-600">📍 {profile.location}</p>}
-              </div>
-            )}
-          </div>
-        ) : (
-          <p>No profile found</p>
-        )}
+
+                <div className="mt-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Update Avatar</label>
+                  <input type="file" accept="image/*" className="block w-full text-sm text-gray-700" />
+                  <p className="text-xs text-gray-500 mt-1">PNG/JPG up to 2MB.</p>
+                </div>
+
+                <div className="mt-6 flex gap-3">
+                  <Button className="w-full" onClick={onSave}>Save Changes</Button>
+                  <Button variant="secondary" className="w-full" type="button">Preview</Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <h3 className="text-lg font-semibold text-gray-900">Safety & Visibility</h3>
+              </CardHeader>
+              <CardContent>
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    name="allowMessages"
+                    checked={form.allowMessages}
+                    onChange={onChange}
+                    className="h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                  />
+                  <span className="text-sm text-gray-700">Allow new messages from non-matches</span>
+                </label>
+                <p className="text-xs text-gray-500 mt-2">You can change this anytime.</p>
+              </CardContent>
+            </Card>
+          </aside>
+
+          <section className="lg:col-span-2 space-y-6">
+            <Card>
+              <CardHeader>
+                <h2 className="text-lg font-semibold text-gray-900">Personal Information</h2>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={onSave} className="space-y-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Input
+                      label="Full Name"
+                      name="name"
+                      value={form.name}
+                      onChange={onChange}
+                      placeholder="Your full name"
+                    />
+                    <Input
+                      label="Username"
+                      name="username"
+                      value={form.username}
+                      onChange={onChange}
+                      placeholder="yourhandle"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Input
+                      label="Email"
+                      type="email"
+                      name="email"
+                      value={form.email}
+                      onChange={onChange}
+                      placeholder="you@example.com"
+                    />
+                    <Input
+                      label="Phone"
+                      name="phone"
+                      value={form.phone}
+                      onChange={onChange}
+                      placeholder="(555) 555-1234"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Input
+                      label="City"
+                      name="city"
+                      value={form.city}
+                      onChange={onChange}
+                      placeholder="City, State"
+                    />
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Match Radius (miles)</label>
+                      <input
+                        type="number"
+                        name="preferredRadius"
+                        min={1}
+                        max={100}
+                        value={form.preferredRadius}
+                        onChange={onChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                    <textarea
+                      name="bio"
+                      rows={4}
+                      value={form.bio}
+                      onChange={onChange}
+                      placeholder="Tell other owners about you and your pup!"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <Button type="submit">Save Profile</Button>
+                    <Button type="button" variant="secondary" onClick={() => history.back()}>
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold text-gray-900">My Dogs</h2>
+                  <Button size="sm" asChild>
+                    <Link href="/dogs/new">Add Dog</Link>
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                  {[1, 2].map(i => (
+                    <div key={i} className="border rounded-lg p-4 flex gap-3 bg-white">
+                      <div className="relative h-16 w-16 rounded-md overflow-hidden bg-gray-100">
+                        <Image src="/dogs/sample-dog.jpg" alt="Dog" fill className="object-cover" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-medium text-gray-900">Nala</div>
+                        <div className="text-sm text-gray-500">Golden Retriever • 3 yrs</div>
+                        <div className="mt-2 flex gap-2">
+                          <Button size="sm" variant="secondary" asChild>
+                            <Link href={`/dogs/${i}`}>Edit</Link>
+                          </Button>
+                          <Button size="sm" variant="outline" asChild>
+                            <Link href={`/dogs/${i}`}>View</Link>
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+        </div>
       </div>
+
+      <Footer />
     </div>
   );
 }
