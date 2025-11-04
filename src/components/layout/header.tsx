@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { User, Heart, Calendar } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabase";
@@ -11,6 +12,7 @@ export const Header = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     // Get initial session
@@ -51,8 +53,16 @@ export const Header = () => {
   }, [showDropdown]);
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    setShowDropdown(false);
+    try {
+      await supabase.auth.signOut();
+    } finally {
+      setShowDropdown(false);
+      // Immediate redirect to login and force reload so protected content is not visible
+      router.replace('/login');
+      if (typeof window !== 'undefined') {
+        window.location.replace('/login');
+      }
+    }
   };
 
   return (
