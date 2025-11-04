@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,7 +22,7 @@ interface User {
   location: string;
 }
 
-export default function PlaydateRequestPage() {
+function PlaydateRequestInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const dogIdFromUrl = searchParams.get('dogId');
@@ -346,6 +346,14 @@ export default function PlaydateRequestPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PlaydateRequestPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <PlaydateRequestInner />
+    </Suspense>
   );
 }
 

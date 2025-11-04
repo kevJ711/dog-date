@@ -87,10 +87,10 @@ export const Header = () => {
               Play Dates
             </Link>
             <Link
-              href="/messages"
+              href="/likes"
               className="text-gray-700 hover:text-gray-900 font-medium transition"
             >
-              Messages
+              Likes
             </Link>
           </nav>
 

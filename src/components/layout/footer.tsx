@@ -28,8 +28,8 @@ export const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link href="/messages" className="text-gray-300 hover:text-white transition">
-                  Messages
+                <Link href="/likes" className="text-gray-300 hover:text-white transition">
+                  Likes
                 </Link>
               </li>
             </ul>

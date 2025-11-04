@@ -11,12 +11,13 @@ type DiscoveryCardProps = {
     dogBio: string;
     photoUrl?: string;
     ownerName?: string;
+    ownerId?: string;
     className?: string;
     likeButton: React.ReactNode;
     expandButton: React.ReactNode;
 };
 
-export default function DiscoveryCard({dogId, dogName, dogTemp, avalibility, dogBio, photoUrl, ownerName, likeButton, expandButton} : DiscoveryCardProps) {
+export default function DiscoveryCard({dogId, dogName, dogTemp, avalibility, dogBio, photoUrl, ownerName, ownerId, likeButton, expandButton} : DiscoveryCardProps) {
    return(
     <div className="w-full h-full">
         <div className="bg-white w-auto h-full rounded-3xl shadow-lg border-2 overflow-hidden flex flex-col">
@@ -62,7 +63,19 @@ export default function DiscoveryCard({dogId, dogName, dogTemp, avalibility, dog
                     <h1 className="text-black text-xl font-mono font-light;" >Meet: </h1>
                     <h2 className="text-gray-800 text-lg font-medium mb-1">{ dogName }</h2>
                     {ownerName && (
-                        <p className="text-gray-600 text-sm mb-3">Owner: {ownerName}</p>
+                        <p className="text-gray-600 text-sm mb-3">
+                          Owner: {ownerId ? (
+                            <Link 
+                              href={`/profile/owner/${ownerId}`} 
+                              className="underline text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                              onClick={(e) => {
+                                e.stopPropagation(); // Prevent card expansion when clicking owner link
+                              }}
+                            >
+                              {ownerName}
+                            </Link>
+                          ) : ownerName}
+                        </p>
                     )}
                     <h1 className="text-black text-xl font-mono font-light;" >Temperment: </h1>
                     <h2 className="text-gray-800 text-lg font-medium mb-3">{ dogTemp }</h2>

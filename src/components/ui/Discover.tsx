@@ -133,7 +133,7 @@ export default function Discover() {
       // Fetch all dogs except current user's dogs
       const { data: dogsData, error: dogsError } = await supabase
         .from('dogs')
-        .select('*, profiles!dogs_owner_id_fkey(name, username)')
+        .select('*, profiles!dogs_owner_id_fkey(id, name, username)')
         .neq('owner_id', user.id);
 
       if (dogsError) {
@@ -237,6 +237,7 @@ export default function Discover() {
                 dogBio={formatDogBio(dog)}
                 photoUrl={dog.photo_url}
                 ownerName={dog.profiles?.name || dog.profiles?.username || 'Unknown Owner'}
+                ownerId={dog.owner_id}
                 expandButton={
                   <button onClick={() => setExpandedCardId(dog.id)} className="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors">
                     <span className="text-sm font-medium">View Details</span>
@@ -287,6 +288,7 @@ export default function Discover() {
           dogBio={formatDogBio(dog)}
           photoUrl={dog.photo_url}
           ownerName={dog.profiles?.name || dog.profiles?.username || 'Unknown Owner'}
+          ownerId={dog.owner_id}
           expandButton={
                 <button onClick={(e) => {
                   e.stopPropagation();

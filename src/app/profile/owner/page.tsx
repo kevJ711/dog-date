@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
@@ -11,8 +12,18 @@ import { Input } from '@/components/ui/input';
 
 import { Footer } from '@/components/layout/footer';
 
+interface Dog {
+  id: string;
+  name: string;
+  breed: string;
+  age: number;
+  size: string;
+  photo_url?: string;
+}
 
 export default function OwnerProfilePage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
   const [form, setForm] = useState({
     name: '',
     username: '',
@@ -23,6 +34,71 @@ export default function OwnerProfilePage() {
     preferredRadius: 10,
     allowMessages: true,
   });
+  const [dogs, setDogs] = useState<Dog[]>([]);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        
+        // Get current user
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        
+        if (userError || !user) {
+          router.push('/login');
+          return;
+        }
+
+        // Load user's email from auth
+        const email = user.email || '';
+        
+        // Load existing profile
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', user.id)
+          .single();
+
+        if (!profileError && profile) {
+          setForm({
+            name: profile.name || '',
+            username: profile.username || '',
+            email: profile.email || email, // Use profile email or fallback to auth email
+            phone: profile.phone || '',
+            city: profile.city || '',
+            bio: profile.bio || '',
+            preferredRadius: profile.preferredRadius || 10,
+            allowMessages: profile.allowMessages ?? true,
+          });
+          // Load avatar URL if exists
+          if (profile.avatar_url) {
+            setAvatarUrl(profile.avatar_url);
+          }
+        } else {
+          // If no profile exists, use auth email
+          setForm(prev => ({ ...prev, email }));
+        }
+
+        // Load user's dogs
+        const { data: dogsData, error: dogsError } = await supabase
+          .from('dogs')
+          .select('*')
+          .eq('owner_id', user.id);
+
+        if (!dogsError && dogsData) {
+          setDogs(dogsData as Dog[]);
+        }
+      } catch (err) {
+        console.error('Error loading profile data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [router]);
 
   const onChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -38,11 +114,215 @@ export default function OwnerProfilePage() {
     }
   };
 
-  const onSave = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Save owner profile →', form);
-    alert('Owner profile saved! (connect to your API)');
+  const handleRemoveAvatar = async () => {
+    try {
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        alert('You must be logged in to remove your avatar');
+        return;
+      }
+
+      // Get auth token
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        alert('You must be logged in to remove your avatar');
+        return;
+      }
+
+      // Update profile to remove avatar_url
+      const res = await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ avatar_url: null }),
+      });
+
+      const data = await res.json();
+      
+      if (!res.ok) {
+        console.error('Avatar removal error:', data);
+        alert(`Failed to remove avatar: ${data.error || 'Unknown error'}`);
+        return;
+      }
+
+      setAvatarUrl(null);
+      alert('Avatar removed successfully!');
+      
+      // Refresh the page to show updated avatar
+      window.location.reload();
+    } catch (err: any) {
+      console.error('Error removing avatar:', err);
+      alert(`Failed to remove avatar: ${err.message || 'Unknown error'}`);
+    }
   };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file (PNG, JPEG, etc.)');
+        return;
+      }
+
+      // Validate file size (max 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        alert('Image size must be less than 2MB');
+        return;
+      }
+
+      setUploading(true);
+
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      if (userError || !user) {
+        alert('You must be logged in to upload an avatar');
+        return;
+      }
+
+      // Check if profile exists, create if not
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .single();
+
+      if (!existingProfile) {
+        // Create profile if it doesn't exist
+        const { error: createError } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            name: user.email?.split('@')[0] || 'User',
+            username: user.email?.split('@')[0] || 'user',
+            email: user.email || ''
+          });
+
+        if (createError) {
+          console.error('Error creating profile:', createError);
+          alert(`Failed to create profile: ${createError.message}`);
+          return;
+        }
+      }
+
+      // Upload to Supabase storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const filePath = fileName; // Upload directly to bucket root, not in a folder
+
+      // Try uploading to avatars bucket
+      let uploadError = null;
+      let publicUrl = '';
+
+      // First, try to upload
+      const { error: uploadErr } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (uploadErr) {
+        console.error('Upload error:', uploadErr);
+        
+        // If bucket doesn't exist or access denied, try alternative: use a public URL service or store as base64
+        // For now, let's show a helpful error message
+        if (uploadErr.message?.includes('bucket') || uploadErr.message?.includes('not found')) {
+          alert('Storage bucket "avatars" not found. Please create it in Supabase Dashboard → Storage.');
+        } else if (uploadErr.message?.includes('new row violates')) {
+          alert('Permission denied. Please check storage bucket policies in Supabase.');
+        } else {
+          alert(`Upload failed: ${uploadErr.message}. Please check browser console for details.`);
+        }
+        return;
+      }
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      publicUrl = urlData.publicUrl;
+
+      // Update profile with avatar URL
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', user.id);
+
+      if (updateError) {
+        console.error('Update error:', updateError);
+        alert(`Failed to update profile: ${updateError.message}`);
+        return;
+      }
+
+      setAvatarUrl(publicUrl);
+      alert('Avatar uploaded successfully!');
+      
+      // Refresh the page to show updated avatar
+      window.location.reload();
+    } catch (err: any) {
+      console.error('Error uploading avatar:', err);
+      alert(`Failed to upload avatar: ${err.message || 'Unknown error'}`);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const onSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      // Get auth token
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.access_token) {
+        alert('You must be logged in to save your profile');
+        router.push('/login');
+        return;
+      }
+
+      const res = await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+      
+      if (!res.ok) {
+        console.error('Profile save error:', data);
+        alert(`Failed to save profile: ${data.error || 'Unknown error'}`);
+        return;
+      }
+      
+      alert('Profile saved successfully');
+      // Reload data to show updated profile
+      window.location.reload();
+    } catch (err) {
+      console.error('Error saving profile:', err);
+      alert('Failed to save profile. Please try again.');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -59,12 +339,21 @@ export default function OwnerProfilePage() {
               <CardContent>
                 <div className="flex items-center gap-4">
                   <div className="relative h-20 w-20 rounded-full overflow-hidden ring-2 ring-white bg-gray-100">
-                    <Image
-                      src="/avatars/default-dog-owner.png"
-                      alt="Owner avatar"
-                      fill
-                      className="object-cover"
-                    />
+                    {avatarUrl ? (
+                      <Image
+                        src={avatarUrl}
+                        alt="Owner avatar"
+                        fill
+                        className="object-cover"
+                        unoptimized={true}
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <svg className="w-10 h-10 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                    )}
                   </div>
                   <div>
                     <div className="text-gray-900 font-medium">{form.name || 'Your Name'}</div>
@@ -74,33 +363,30 @@ export default function OwnerProfilePage() {
 
                 <div className="mt-6">
                   <label className="block text-sm font-medium text-gray-700 mb-2">Update Avatar</label>
-                  <input type="file" accept="image/*" className="block w-full text-sm text-gray-700" />
-                  <p className="text-xs text-gray-500 mt-1">PNG/JPG up to 2MB.</p>
-                </div>
-
-                <div className="mt-6 flex gap-3">
-                  <Button className="w-full" onClick={onSave}>Save Changes</Button>
-                  <Button variant="secondary" className="w-full" type="button">Preview</Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <h3 className="text-lg font-semibold text-gray-900">Safety & Visibility</h3>
-              </CardHeader>
-              <CardContent>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    name="allowMessages"
-                    checked={form.allowMessages}
-                    onChange={onChange}
-                    className="h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleAvatarUpload}
+                    disabled={uploading}
+                    className="block w-full text-sm text-gray-700 disabled:opacity-50"
                   />
-                  <span className="text-sm text-gray-700">Allow new messages from non-matches</span>
-                </label>
-                <p className="text-xs text-gray-500 mt-2">You can change this anytime.</p>
+                  <p className="text-xs text-gray-500 mt-1">PNG/JPG up to 2MB.</p>
+                  {uploading && <p className="text-xs text-blue-600 mt-1">Uploading...</p>}
+                </div>
+
+                <div className="mt-6">
+                  <Button className="w-full" onClick={onSave}>Save Changes</Button>
+                  {avatarUrl && (
+                    <Button 
+                      variant="secondary" 
+                      className="w-full mt-2" 
+                      type="button"
+                      onClick={handleRemoveAvatar}
+                    >
+                      Remove Image
+                    </Button>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </aside>
@@ -201,27 +487,52 @@ export default function OwnerProfilePage() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {[1, 2].map(i => (
-                    <div key={i} className="border rounded-lg p-4 flex gap-3 bg-white">
-                      <div className="relative h-16 w-16 rounded-md overflow-hidden bg-gray-100">
-                        <Image src="/dogs/sample-dog.jpg" alt="Dog" fill className="object-cover" />
-                      </div>
-                      <div className="flex-1">
-                        <div className="font-medium text-gray-900">Nala</div>
-                        <div className="text-sm text-gray-500">Golden Retriever • 3 yrs</div>
-                        <div className="mt-2 flex gap-2">
-                          <Button size="sm" variant="secondary" asChild>
-                            <Link href={`/dogs/${i}`}>Edit</Link>
-                          </Button>
-                          <Button size="sm" variant="outline" asChild>
-                            <Link href={`/dogs/${i}`}>View</Link>
-                          </Button>
+                {dogs.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-600 mb-4">You haven't added any dogs yet.</p>
+                    <Button size="sm" asChild>
+                      <Link href="/profile/dog">Add Your First Dog</Link>
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {dogs.map((dog) => (
+                      <div key={dog.id} className="border rounded-lg p-4 flex gap-3 bg-white">
+                        <div className="relative h-16 w-16 rounded-md overflow-hidden bg-gray-100">
+                          {dog.photo_url ? (
+                            <Image 
+                              src={dog.photo_url} 
+                              alt={dog.name} 
+                              fill 
+                              className="object-cover"
+                              unoptimized={true}
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                              <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900">{dog.name}</div>
+                          <div className="text-sm text-gray-500">
+                            {dog.breed} • {dog.age} {dog.age === 1 ? 'yr' : 'yrs'} old
+                          </div>
+                          <div className="mt-2 flex gap-2">
+                            <Button size="sm" variant="secondary" asChild>
+                              <Link href={`/profile/dog?dogId=${dog.id}`}>Edit</Link>
+                            </Button>
+                            <Button size="sm" variant="outline" asChild>
+                              <Link href={`/profile/dog?dogId=${dog.id}`}>View</Link>
+                            </Button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </section>

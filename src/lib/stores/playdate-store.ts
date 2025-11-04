@@ -19,7 +19,7 @@ interface PlaydateState {
   // Actions
   setPlaydates: (playdates: PlaydateWithType[]) => void;
   setStatusFilter: (status: PlaydateStatus | 'all') => void;
-  updatePlaydateStatus: (id: number, status: PlaydateStatus) => void;
+  updatePlaydateStatus: (id: string, status: PlaydateStatus) => void;
   addPlaydate: (playdate: PlaydateWithType) => void;
   setLoading: (loading: boolean) => void;
   applyFilters: () => void;
@@ -40,7 +40,7 @@ export const usePlaydateStore = create<PlaydateState>((set, get) => ({
     get().applyFilters();
   },
   
-  updatePlaydateStatus: (id: number, status: PlaydateStatus) => {
+  updatePlaydateStatus: (id: string, status: PlaydateStatus) => {
     const { playdates } = get();
     const updatedPlaydates = playdates.map(playdate =>
       playdate.id === id ? { ...playdate, status } : playdate
