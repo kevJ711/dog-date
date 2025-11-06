@@ -136,13 +136,6 @@ export const Header = () => {
                   >
                     Dog Profile
                   </Link>
-                  <Link
-                    href="/settings"
-                    className="block px-4 py-2 hover:bg-gray-50 text-gray-700 transition"
-                    onClick={() => setShowDropdown(false)}
-                  >
-                    Settings
-                  </Link>
                   <hr className="my-1" />
                   <button
                     onClick={handleSignOut}

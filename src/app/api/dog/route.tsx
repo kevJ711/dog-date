@@ -26,6 +26,30 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', user.id)
+      .single();
+
+    if (!existingProfile) {
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: user.id, 
+          name: user.email?.split('@')[0] || 'User',
+          username: user.email?.split('@')[0] || null,
+          email: user.email || null,
+        });
+
+      if (profileError) {
+        return NextResponse.json({ 
+          error: `Failed to create profile: ${profileError.message}` 
+        }, { status: 500 });
+      }
+    }
+
     const body = await req.json();
     const { name, breed, age, size, temperament, vaccination_status, photo_url } = body;
 
@@ -36,7 +60,7 @@ export async function POST(req: Request) {
     const { data, error } = await supabase
       .from('dogs')
       .insert({
-        owner_id: user.id,
+        owner_id: user.id, 
         name,
         breed,
         age,

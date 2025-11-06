@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "../../lib/supabase";
-import Image from "next/image"; // ✅ Import Next.js Image
+import Image from "next/image"; 
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -32,8 +32,8 @@ export default function SignUpPage() {
     setLoading(true);
 
     try {
-      // Sign up with Supabase
-      const { error } = await supabase.auth.signUp({
+   
+      const { data: signUpData, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
       });
@@ -45,18 +45,22 @@ export default function SignUpPage() {
       }
 
       // Create profile in profiles table
-      const name = `${formData.firstName} ${formData.lastName}`.trim();
-      const username = formData.email.split("@")[0];
+      if (signUpData.user) {
+        const name = `${formData.firstName} ${formData.lastName}`.trim();
+        const username = formData.email.split("@")[0];
 
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          name,
-          username,
-        });
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: signUpData.user.id, 
+            name,
+            username,
+            email: formData.email,
+          });
 
-      if (profileError) {
-        console.error('Profile creation error:', profileError);
+        if (profileError) {
+          console.error('Profile creation error:', profileError);
+        }
       }
 
       alert("Account created! You can now log in.");
@@ -93,7 +97,7 @@ export default function SignUpPage() {
           {/* Logo and title */}
           <div className="flex flex-col items-center justify-center gap-2 mb-2">
             <Image
-              src="/dogdate-logo.png" // ✅ Ensure this file is in the public folder
+              src="/dogdate-logo.png" 
               alt="Dog Date Logo"
               width={90}
               height={90}

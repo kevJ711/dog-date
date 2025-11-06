@@ -137,40 +137,68 @@ export default function DogProfilePage() {
   const handleSaveNew = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        // Prepare data, excluding empty photo_url
-        const dogData = {
-          owner_id: user.id,
-          name: formData.name,
-          breed: formData.breed,
-          age: formData.age || 0,
-          size: formData.size,
-          temperament: formData.temperament || null,
-          vaccination_status: formData.vaccination_status,
-          ...(formData.photo_url && { photo_url: formData.photo_url })
-        };
+      if (!user) {
+        alert('You must be logged in to create a dog profile.');
+        return;
+      }
 
-        const { error } = await supabase
-          .from('dogs')
-          .insert(dogData);
+      // Ensure profile exists (since owner_id references profiles.id)
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id)
+        .single();
 
-        if (error) {
-          console.error('Failed to create dog:', error.message || error);
-          alert(`Failed to create dog: ${error.message || 'Unknown error'}`);
-        } else {
-          setAdding(false);
-          fetchDogs(); // Refresh data
-          // Reset form
-          setFormData({
-            name: '',
-            breed: '',
-            age: 0,
-            size: 'Medium',
-            temperament: '',
-            vaccination_status: 'Up to date',
-            photo_url: ''
+      if (!existingProfile) {
+        // Create profile if it doesn't exist
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id, // profiles.id must match auth.users.id
+            name: user.email?.split('@')[0] || 'User',
+            username: user.email?.split('@')[0] || null,
+            email: user.email || null,
           });
+
+        if (profileError) {
+          console.error('Profile creation error:', profileError);
+          alert(`Failed to create profile: ${profileError.message}. Please set up your profile first.`);
+          return;
         }
+      }
+
+      // Prepare data, excluding empty photo_url
+      const dogData = {
+        owner_id: user.id, // This should match profiles.id which references auth.users.id
+        name: formData.name,
+        breed: formData.breed,
+        age: formData.age || 0,
+        size: formData.size,
+        temperament: formData.temperament || null,
+        vaccination_status: formData.vaccination_status,
+        ...(formData.photo_url && { photo_url: formData.photo_url })
+      };
+
+      const { error } = await supabase
+        .from('dogs')
+        .insert(dogData);
+
+      if (error) {
+        console.error('Failed to create dog:', error.message || error);
+        alert(`Failed to create dog: ${error.message || 'Unknown error'}`);
+      } else {
+        setAdding(false);
+        fetchDogs(); // Refresh data
+        // Reset form
+        setFormData({
+          name: '',
+          breed: '',
+          age: 0,
+          size: 'Medium',
+          temperament: '',
+          vaccination_status: 'Up to date',
+          photo_url: ''
+        });
       }
     } catch (err) {
       console.error('Failed to create dog:', err);

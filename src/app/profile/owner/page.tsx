@@ -482,7 +482,7 @@ export default function OwnerProfilePage() {
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-semibold text-gray-900">My Dogs</h2>
                   <Button size="sm" asChild>
-                    <Link href="/dogs/new">Add Dog</Link>
+                    <Link href="/profile/dog">Add Dog</Link>
                   </Button>
                 </div>
               </CardHeader>
