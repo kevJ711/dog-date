@@ -1,4 +1,5 @@
-# **Dog Date – A Social App for Dog Owners**  
+# **[Dog Date – A Social App for Dog Owners](https://dog-date-xi.vercel.app/)**  
+
 A lovable web app in 6–8 weeks that lets owners create profiles, browse for nearby dogs, and request/play date meetups.  
 ---  
 ## Fontend Team  
